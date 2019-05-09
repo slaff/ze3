@@ -29,18 +29,24 @@ class AuthMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
+    	$authorized = false;
+
 		// get the matched route
     	$result = $request->getAttribute(RouteResult::class);
-
-
-		// TODO: Check if should be authenticated
-
-    	$authorized = false;
-    	// check if there is query param "letmein" and letmein==1 then allow.
     	$params = $request->getQueryParams();
-    	if(isset($params[self::KEY]) && $params[self::KEY] == 1) {
-    		$authorized = true;
-    	}
+
+    	// TODO: create table users(uniqueid, username, password)
+    	// TODO: Get the username and password from Basic Auth....
+    	$user = $params['user'];
+    	$password = $params['password'];
+
+		$sql = "SELECT * FROM users WHERE username=? AND password=?";
+		$resultSet = $this->db->query($sql, [$user, $password]);
+// 		$count = $resultSet->count();
+		$row = $resultSet->current();
+		if($row['id']) {
+			$authorized = true;
+		}
 
     	if(!$authorized) {
     		$response = new JsonResponse([
