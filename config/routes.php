@@ -33,7 +33,20 @@ use Zend\Expressive\MiddlewareFactory;
  * );
  */
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container) : void {
+	// TOP
     $app->get('/', App\Handler\HomePageHandler::class, 'home');
-    $app->get('/api/ping', App\Handler\PingHandler::class, 'api.ping');
-    $app->route('/api/ping[/:name]', App\Handler\PingHandler::class, ['GET','POST','DELETE'], 'api.ping.anymethod');
+
+
+    $app->get('/api/ping[/:param2]', App\Handler\PingHandler::class, 'api.ping');
+
+    $app->route('/api/ping[/:param1]', [
+	    		// Middleware1,
+	    		// Middleware2,
+	    		App\Handler\PingHandler::class,
+	    		]
+    		, ['GET','POST','DELETE'], 'api.ping.anymethod');
+
+
+    // BOTTOM !!! Eval -> Bottom to Top
+    // Best practise > General Routes go to top and specific ones go to bottom
 };

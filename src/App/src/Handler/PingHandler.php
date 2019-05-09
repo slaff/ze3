@@ -26,11 +26,13 @@ class PingHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
     	$result = $request->getAttribute(RouteResult::class);
+    	$param1 = $request->getAttribute("param1");
     	$name = $result->getMatchedRouteName();
 
         return new JsonResponse([
         		'ack' => time(),
         		'route-name' => $name,
+        		"param1" => $param1
         ]);
     }
 }
