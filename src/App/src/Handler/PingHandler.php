@@ -11,6 +11,7 @@ use Zend\Diactoros\Response\JsonResponse;
 
 use function time;
 use Zend\Expressive\Router\RouterInterface;
+use Zend\Expressive\Router\RouteResult;
 
 class PingHandler implements RequestHandlerInterface
 {
@@ -24,13 +25,12 @@ class PingHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-    	// TODO: get the router result <- what was the matched route to come here
-    	// TODO: from the router result  get the name of the route that matched
-		$name = "Fake";
+    	$result = $request->getAttribute(RouteResult::class);
+    	$name = $result->getMatchedRouteName();
 
         return new JsonResponse([
-        			'ack' => time(),
-        			'route-name' => $name,
+        		'ack' => time(),
+        		'route-name' => $name,
         ]);
     }
 }
