@@ -10,14 +10,21 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Expressive\Router\RouteResult;
+use Zend\Db\Adapter\Adapter;
+use Zend\Db\Adapter\AdapterInterface;
 
 class AuthMiddleware implements MiddlewareInterface
 {
 	const KEY = "letmein";
 
-	public function __construct($db)
-	{
+	/**
+	 * @var AdapterInterface
+	 */
+	private $db;
 
+	public function __construct(AdapterInterface $db)
+	{
+		$this->db = $db;
 	}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface

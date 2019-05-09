@@ -10,10 +10,8 @@ class AuthMiddlewareFactory
 {
     public function __invoke(ContainerInterface $container) : AuthMiddleware
     {
-    	// TODO: get database from container
-
-    	$db = 0;
-
+    	// get database from container
+		$db = $container->get('db1');
         return new AuthMiddleware($db);
     }
 }
