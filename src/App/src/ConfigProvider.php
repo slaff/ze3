@@ -36,8 +36,12 @@ class ConfigProvider
 //                 Handler\PingHandler::class => Handler\PingHandler::class,
             ],
             'factories'  => [
+                // handlers
                 Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
             	Handler\PingHandler::class => Handler\PingHandlerFactory::class,
+
+            	// middleware
+            	Middleware\AuthMiddleware::class => Middleware\AuthMiddlewareFactory::class,
             ],
         ];
     }

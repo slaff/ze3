@@ -9,22 +9,45 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Expressive\Router\RouteResult;
 
 class AuthMiddleware implements MiddlewareInterface
 {
+	const KEY = "letmein";
+
+	public function __construct($db)
+	{
+
+	}
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-    	$response = new JsonResponse([
-    					"auth" => false
-    				]);
+		// get the matched route
+    	$result = $request->getAttribute(RouteResult::class);
 
-    	$response = $response->withStatus(401);
 
-    	// Task: add special header X-Inpeco-Auth: Denied
+		// TODO: Check if should be authenticated
 
-//     	return $response;
-//     	//
-//         $response = $handler->handle($request);
-//         return $response;
+    	$authorized = false;
+    	// check if there is query param "letmein" and letmein==1 then allow.
+    	$params = $request->getQueryParams();
+    	if(isset($params[self::KEY]) && $params[self::KEY] == 1) {
+    		$authorized = true;
+    	}
+
+    	if(!$authorized) {
+    		$response = new JsonResponse([
+    				"auth" => false
+    		]);
+
+    		$response = $response->withStatus(401);
+    		$response = $response->withHeader("X-Inpeco-Auth","Denied");
+
+    		return $response;
+    	}
+
+        $response = $handler->handle($request);
+
+        return $response;
     }
 }

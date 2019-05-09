@@ -36,7 +36,6 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
 	// TOP
     $app->get('/', App\Handler\HomePageHandler::class, 'home');
 
-
     $app->get('/api/ping[/:param2]', App\Handler\PingHandler::class, 'api.ping');
 
     $app->route('/api/ping[/:param1]', [
