@@ -12,6 +12,7 @@ use Zend\Diactoros\Response\JsonResponse;
 use Zend\Expressive\Router\RouteResult;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\AdapterInterface;
+use App\Entity\UserEntity;
 
 class AuthMiddleware implements MiddlewareInterface
 {
@@ -31,14 +32,37 @@ class AuthMiddleware implements MiddlewareInterface
     {
     	$authorized = false;
 
-		// get the matched route
-    	$result = $request->getAttribute(RouteResult::class);
-    	$params = $request->getQueryParams();
+    	// Sample: Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l -> base64 -> user:password -
+    	$authHeader = $request->getHeader("Authorization");
+		if(!$authHeader) {
+			$response = new JsonResponse([
+					"auth" => false
+			]);
 
-    	// TODO: create table users(uniqueid, username, password)
-    	// TODO: Get the username and password from Basic Auth....
-    	$user = $params['user'];
-    	$password = $params['password'];
+			$response = $response->withStatus(401); // TODO...
+			$response = $response->withHeader("WWW-Authenticate",'Basic realm="User Visible Realm"');
+
+			return $response;
+		}
+
+		$authHeader = $authHeader[0];
+		if(!preg_match('/^(\s*)Basic(\s+)(.*?)$/', $authHeader, $matches)) {
+			$response = new JsonResponse([
+					"auth" => false
+			]);
+
+			$response = $response->withStatus(401); // TODO...
+			$response = $response->withHeader("WWW-Authenticate",'Basic realm="User Visible Realm"');
+
+			return $response;
+		}
+
+		$encodedUserPassword = trim($matches[3]);
+		$authString = base64_decode($encodedUserPassword);
+		$data = preg_split("/:/", $authString, 2);
+
+    	$user = $data[0];
+    	$password = $data[1];
 
 		$sql = "SELECT * FROM users WHERE username=? AND password=?";
 		$resultSet = $this->db->query($sql, [$user, $password]);
@@ -46,6 +70,12 @@ class AuthMiddleware implements MiddlewareInterface
 		$row = $resultSet->current();
 		if($row['id']) {
 			$authorized = true;
+
+			$userEntity = new UserEntity();
+			$userEntity->setId($row['id']);
+			$userEntity->setName($row['username']);
+
+			$request = $request->withAttribute(UserEntity::class, $userEntity);
 		}
 
     	if(!$authorized) {
